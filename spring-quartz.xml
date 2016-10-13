@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">
+	
+	<!-- 未签到用户检查定时任务 -->
+	<bean id="checkUserSingInTask" class="com.boyuanitsm.easyplay.taskontime.CheckUserSingInTask"/>
+	
+	<!--定义定时执行checkUserSingInTask 这个bean中的doJob()方法-->
+	<bean id="jobDetailBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!--执行的那个方法对应的bean-->
+		<property name="targetObject">
+			<ref bean="checkUserSingInTask" />
+		</property>
+		<!--执行的方法-->
+		<property name="targetMethod" value="doJob" />
+	</bean>
+	
+	<!--触发器的bean的设置 -->
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetailBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="${sign_in_task_on_time}" />
+	</bean>
+	
+	<!-- 检查抵扣券过期时间 -->
+	<bean id="checkDeductonTimeOut" class="com.boyuanitsm.easyplay.taskontime.CheckDeductonTimeOut"/>
+	
+	<!--定义定时执行checkDeductonTimeOut 这个bean中的doWork()方法-->
+	<bean id="checkJobBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!--执行的那个方法对应的bean-->
+		<property name="targetObject">
+			<ref bean="checkDeductonTimeOut"/>
+		</property>
+		<!--执行的方法-->
+		<property name="targetMethod" value="doWork" />
+		
+		<property name="concurrent">  
+        	<value>false</value>  
+   		</property>
+	</bean>
+	
+	<!-- 玩转金蛛检查抵扣券过期时间 -->
+	<bean id="checkPlayJZDeductonTimeOut" class="com.boyuanitsm.easyplay.taskontime.CheckPlayJZDeductonTimeOut"/>
+	
+	<bean id="checkPlayJZJobBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!--执行的那个方法对应的bean-->
+		<property name="targetObject">
+			<ref bean="checkPlayJZDeductonTimeOut"/>
+		</property>
+		<!--执行的方法-->
+		<property name="targetMethod" value="doWork" />
+		
+		<property name="concurrent">  
+        	<value>false</value>  
+   		</property>
+	</bean>
+	
+	<!--触发器的bean的设置 -->
+	<bean id="cronTriggerCheck" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="checkJobBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+	
+	<!--触发器的bean的设置 -->
+	<bean id="cronTriggerCheckPlayJZ" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="checkPlayJZJobBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+	
+	<!-- 检查用户奖励过期时间 -->
+	<bean id="checkUserAwardTimeOut" class="com.boyuanitsm.easyplay.taskontime.CheckUserAwardTimeOut"/>
+	
+	<bean id="checkAwardBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!--执行的那个方法对应的bean-->
+		<property name="targetObject">
+			<ref bean="checkUserAwardTimeOut"/>
+		</property>
+		<!--执行的方法-->
+		<property name="targetMethod" value="doWork" />
+		
+		<property name="concurrent">  
+        	<value>false</value>  
+   		</property>
+	</bean>
+	
+	<!--用户奖励触发器的bean的设置 -->
+	<bean id="cronAwardCheck" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="checkAwardBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+		
+		
+	<!-- 系统自动下发任务定时器bean -->
+	<bean id="sendAssignmentTask" class="com.boyuanitsm.easyplay.taskontime.SendAssignmentTask"/>
+	
+	<bean id="sendAssingnmentBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="sendAssignmentTask" />
+		</property>
+		<property name="targetMethod" value="sendAssignmentJob" />
+	</bean>
+	
+	<!--下发任务触发器的bean的设置 -->
+	<bean id="sendAssingnmentTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sendAssingnmentBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0/5 * * * ?" />
+	</bean>
+	
+	<!-- 信贷经理订单超时(超过一定时间未处理)释放任务 -->
+	<bean id="orderTimeOutReleaseTask" class="com.boyuanitsm.easyplay.taskontime.OrderTimeOutReleaseTask">
+		<property name = "orderTimeOutDay" value="${order_time_out_day}" />
+	</bean>
+	
+	<bean id="orderTimeOutReleaseBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="orderTimeOutReleaseTask" />
+		</property>
+		<property name="targetMethod" value="orderTimeOutReleaseJob" />
+	</bean>
+	
+	<bean id="orderTimeOutReleaseTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="orderTimeOutReleaseBean" />
+		<property name="cronExpression" value="0 0 2 * * ?" />
+	</bean>
+
+    <!-- 平台数据统计任务 -->
+	<bean id="dataStatisticsTask" class="com.boyuanitsm.easyplay.taskontime.DataStatisticsTask"/>
+	<bean id="dataStatisticsTaskBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="dataStatisticsTask"/>
+		</property>
+		<property name="targetMethod" value="doWork" />
+        <property name="concurrent">
+        	<value>false</value>  
+   		</property>
+	</bean>
+	<bean id="crondataStatisticsTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="dataStatisticsTaskBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0 2 * * ?" />
+	</bean>
+    <!--end-->
+	
+	<!-- 奥运活动 -->
+	<bean id="grantOlympicReward" class="com.boyuanitsm.easyplay.taskontime.GrantOlympicReward"/>
+	
+	<bean id="grantOlympicRewardBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="grantOlympicReward"/>
+		</property>
+		<property name="targetMethod" value="doWork" />
+	</bean>
+	<bean id="grantOlympicRewardTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="grantOlympicRewardBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 0 12 22 8 ? 2016" />
+	</bean>
+    <!--end-->
+	
+	<!-- 检查奥运活动发放抵扣券是否过期 -->
+	<bean id="checkGrantOlympicReward" class="com.boyuanitsm.easyplay.taskontime.CheckGrantOlympicReward"/>
+	<bean id="checkGrantOlympicRewardBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="checkGrantOlympicReward"/>
+		</property>
+		<property name="targetMethod" value="doWork" />
+	</bean>
+	
+	<bean id="checkGrantOlympicRewardTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="checkGrantOlympicRewardBean" />
+		<!--任务执行时间-->
+		<property name="cronExpression" value="0 0 12 29 8 ? 2016" />
+	</bean> 
+
+	
+    <!--end-->
+
+    <!-- 同步用户表中从安卓市场注册的用户的手机归属地 -->
+    <bean id="syncMobileLocationJob" class="com.boyuanitsm.easyplay.taskontime.SyncMobileLocationJob"/>
+    <bean id="syncMobileLocationFactory"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="syncMobileLocationJob"/>
+        </property>
+        <property name="targetMethod" value="syncLocation"/>
+        <property name="concurrent">
+            <value>false</value>
+        </property>
+    </bean>
+    <bean id="syncMobileLocationTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="syncMobileLocationFactory"/>
+        <!-- 每两分钟执行一次 -->
+        <property name="cronExpression" value="0 0/2 * * * ?"/>
+    </bean>
+    <!--end-->
+		   
+    <!-- 检查新人注册活动发放抵扣券是否过期 -->
+	<bean id="checkNewRegisteActReward" class="com.boyuanitsm.easyplay.taskontime.CheckNewRegisteActReward"/>
+	<bean id="checkNewRegisteActRewardBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="checkNewRegisteActReward"/>
+		</property>
+		<property name="targetMethod" value="doWork" />
+	</bean>
+	<bean id="checkNewRegisteActRewardTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="checkNewRegisteActRewardBean" />
+		<!-- 任务执行时间  -->
+		<property name="cronExpression" value="0 */1 * * * ?"  /> 
+	</bean>
+    <!--end-->
+
+    <!--管理触发器的总设置,管理触发器列表 ,在bean的list中放置多个触发器。-->
+	<bean autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<!--<ref bean="cronTrigger" />-->
+				<!--<ref bean="sendAssingnmentTrigger"/>-->
+				<!--<ref bean="orderTimeOutReleaseTrigger"/>-->
+				<ref bean="cronTriggerCheck"/>
+				<ref bean="crondataStatisticsTask"/>
+				<ref bean="cronTriggerCheckPlayJZ"/>
+				<!-- <ref bean="grantOlympicRewardTask"/>
+				<ref bean="checkGrantOlympicRewardTask"/> -->
+				<ref bean="checkNewRegisteActRewardTask"/>
+                <ref bean="syncMobileLocationTrigger"/>
+				<!--<ref bean="cronAwardCheck"/>-->
+			</list>
+		</property>
+	</bean>
+</beans>

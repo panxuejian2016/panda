@@ -1,0 +1,66 @@
+[
+  {
+    "modelName": "Banner",
+    "modelKey": "BANNER_MANAGER",
+    "isAry": true,
+    "opt": [
+      {
+        "desc": "上传Banner图片",
+        "type": "upload",
+        "key": "fileId"
+      },
+      {
+        "desc": "Banner链接地址",
+        "type": "string",
+        "key": "href"
+      }
+    ]
+  },
+  {
+    "modelName": "浮窗",
+    "modelKey": "FLOAT_WINDOW_MANAGER",
+    "isAry": false,
+    "opt": [
+    {
+        "desc": "浮窗名称",
+        "type": "select",
+        "key": "isFloating",
+        "data": [
+          {
+            "key": "servicez",
+            "value": "服务者指南"
+          },
+          {
+            "key": "loan",
+            "value": "贷款指南"
+          }
+        ]
+      },
+      {
+        "desc": "是否显示",
+        "type": "select",
+        "key": "isShow",
+        "data": [
+          {
+            "key": true,
+            "value": "是"
+          },
+          {
+            "key": false,
+            "value": "否"
+          }
+        ]
+      },
+      {
+        "desc": "浮窗图片",
+        "type": "upload",
+        "key": "fileId"
+      },
+      {
+        "desc": "浮窗链接",
+        "type": "string",
+        "key": "href"
+      }
+    ]
+  }
+]
